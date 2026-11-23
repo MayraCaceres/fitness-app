@@ -17,6 +17,9 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .seg{display:flex;background:rgba(255,255,255,.55);border:1px solid #0A8F96;border-radius:999px;padding:3px}
 .seg button{border:0;background:transparent;color:#06484B;font-size:13px;font-weight:700;padding:8px 14px;min-height:36px;border-radius:999px}
 .seg button.on{background:#06292B;color:#fff}
+.out{border:1px solid #0A8F96;background:rgba(255,255,255,.55);color:#06292B;border-radius:999px;font-size:13px;font-weight:700;padding:8px 14px;min-height:40px}
+.err{background:#FFE3E0;color:#7A1410;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;margin-top:10px}
+.lab{display:block;font-size:13px;font-weight:700;color:#06484B;margin:14px 0 6px}
 #main{flex:1;overflow-y:auto;padding:12px 20px 20px}
 h1{margin:6px 0 2px;font-size:28px;font-weight:800;letter-spacing:-.02em;color:#06292B}
 .sub{margin:0 0 14px;font-size:15px;color:#06484B;font-weight:500}
@@ -59,7 +62,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid #06292B;outline-
 <body>
 <div id="phone">
   <div id="top"><span class="brand">FITNESS</span>
-    <div class="seg" role="group" aria-label="Modo"><button id="r-c" data-act="role" data-v="c">Cliente</button><button id="r-t" data-act="role" data-v="t">Entrenador</button></div>
+    <div id="topR"></div>
   </div>
   <div id="main"></div>
   <div id="rest"><span id="restTxt">Descanso 60 s</span><button data-act="skipRest">Saltar</button></div>
@@ -73,7 +76,7 @@ const def=()=>({role:'c',tab:'hoy',
  weights:[65.5,65,64.6,64.2,63.9,63.4],bookings:[],
  chat:[{f:'t',x:'¡Hola Camila! Hoy toca pierna y glúteo. Cualquier duda me escribes.'}],
  clients:[{n:'Camila M.',goal:'Tonificar',days:0,pay:20},{n:'Jorge R.',goal:'Fuerza',days:5,pay:12},{n:'Lucía P.',goal:'Pérdida de grasa',days:1,pay:9},{n:'Diego V.',goal:'Hipertrofia',days:0,pay:2}],
- sel:null,day:0,builder:{name:'',items:[]},filter:'all'});
+ auth:null,err:'',sel:null,day:0,builder:{name:'',items:[]},filter:'all'});
 let S=def();
 try{const r=localStorage.getItem('pt-proto');if(r)S=Object.assign(def(),JSON.parse(r))}catch(e){}
 const save=()=>{try{localStorage.setItem('pt-proto',JSON.stringify(S))}catch(e){}};
@@ -126,7 +129,16 @@ function vRut(){const b=S.builder;
  b.items.map((it,i)=>`<div class="card row"><div class="grow"><div class="t">${esc(it.ex)}</div><div class="m">${it.sets} × ${it.reps}</div></div><button class="sm" aria-label="Quitar" data-act="rmEx" data-i="${i}">×</button></div>`).join('')+
  `<div style="height:6px"></div><button class="btn" data-act="saveR">Guardar rutina</button>`}
 
-function render(){const t=S.role;$('r-c').classList.toggle('on',t==='c');$('r-t').classList.toggle('on',t==='t');
+function vLogin(){return `<h1 style="margin-top:28px">Bienvenida a FITNESS</h1><p class="sub">Ingresa con tu usuario y contraseña</p>
+ <form id="lf" autocomplete="off"><label class="lab" for="uIn">Usuario</label><input id="uIn" autocapitalize="none" autocorrect="off" spellcheck="false">
+ <label class="lab" for="pIn">Contraseña</label><input id="pIn" type="password">
+ ${S.err?`<div class="err" role="alert">${esc(S.err)}</div>`:''}
+ <div style="height:16px"></div><button class="btn" type="submit" data-act="login">Ingresar</button></form>
+ <div class="card" style="margin-top:18px"><div class="lbl" style="margin-top:0">CUENTAS DE DEMOSTRACIÓN</div><div class="m">Cliente: <b>camila</b> / <b>fitness2026</b></div><div class="m" style="margin-top:4px">Entrenador: <b>entrenador</b> / <b>fitness2026</b></div></div>
+ <p class="note">Prototipo: las cuentas son de ejemplo y no son seguras.</p>`}
+function render(){
+ if(!S.auth){$('topR').innerHTML='';$('nav').style.display='none';$('main').innerHTML=vLogin();save();return}
+ $('nav').style.display='flex';S.role=S.auth;$('topR').innerHTML='<button class="out" data-act="logout">Salir</button>';const t=S.role;
  const tabs=TABS[t];if(!tabs.some(x=>x[0]===S.tab))S.tab=tabs[0][0];
  $('nav').innerHTML=tabs.map(x=>`<button class="${S.tab===x[0]?'on':''}" data-act="tab" data-v="${x[0]}">${svg(ic[x[2]])}${x[1]}</button>`).join('');
  const V={hoy:vHoy,ag:vAgenda,pr:vProg,ch:vChat,cl:vClientes,ru:vRut};$('main').innerHTML=V[S.tab]();
@@ -138,7 +150,8 @@ function tick(){$('restTxt').textContent='Descanso '+rest+' s'}
 function stopRest(){clearInterval(timer);$('rest').style.display='none'}
 
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,d=b.dataset;
- if(a==='role'){S.role=d.v;S.tab=null;S.sel=null;stopRest()}
+ if(a==='login'){e.preventDefault();const u=($('uIn').value||'').trim().toLowerCase(),p=$('pIn').value;const A={camila:'c',entrenador:'t'};if(A[u]&&p==='fitness2026'){S.auth=A[u];S.role=A[u];S.tab=null;S.sel=null;S.err=''}else{S.err='Usuario o contraseña incorrectos.'}}
+ else if(a==='logout'){S.auth=null;S.tab=null;S.sel=null;S.err='';stopRest()}
  else if(a==='tab'){S.tab=d.v;S.sel=null}
  else if(a==='skipRest'){stopRest();return}
  else if(a==='kg'){const it=S.routine.items[+d.i];it.kg=Math.max(0,it.kg+ +d.d)}
