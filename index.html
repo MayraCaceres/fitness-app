@@ -113,36 +113,48 @@ const AVO=[
 {k:'bg',l:'FONDO',t:'sw',o:[{v:'#0FA3A3',n:'Turquesa'},{v:'#6C4BD1',n:'Morado'},{v:'#D94F70',n:'Frambuesa'},{v:'#2D7DD2',n:'Azul'},{v:'#F2A93B',n:'Mostaza'},{v:'#2A2F36',n:'Gris'}]}];
 let lastTab=null;
 const cl=v=>/^#[0-9A-Fa-f]{6}$/.test(v)?v:'#888888';
-function av(o,sz){o=o||{};const sk=cl(o.skin),hc=cl(o.hair),ou=cl(o.outfit),bg=cl(o.bg),ec=cl(o.eye||'#4A2C17'),st=o.hairStyle,ac=o.acc==='gafas'?'lentes':o.acc,ex=o.expr||'sonrisa',ro=o.ropa||'polo';
- const L='stroke="#1A1A1A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"';
+let avN=0;
+const mix=(h,t,a)=>{const n=parseInt(h.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,f=c=>Math.round(c+(t-c)*a);return '#'+[f(r),f(g),f(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+const lt=(h,a)=>mix(h,255,a),dk=(h,a)=>mix(h,0,a);
+function av(o,sz){o=o||{};const id='a'+(++avN),sk=cl(o.skin),hc=cl(o.hair),ou=cl(o.outfit),bg=cl(o.bg),ec=cl(o.eye||'#4A2C17'),st=o.hairStyle,ac=o.acc==='gafas'?'lentes':o.acc,ex=o.expr||'sonrisa',ro=o.ropa||'polo';
+ const L='stroke="rgba(25,12,12,.55)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"';
+ const S=`url(#${id}s)`,H=`url(#${id}h)`,O=`url(#${id}o)`;
+ const defs=`<clipPath id="${id}c"><circle cx="60" cy="60" r="60"/></clipPath>
+<radialGradient id="${id}b" cx=".5" cy=".3" r=".9"><stop offset="0" stop-color="${lt(bg,.3)}"/><stop offset=".6" stop-color="${bg}"/><stop offset="1" stop-color="${dk(bg,.28)}"/></radialGradient>
+<radialGradient id="${id}s" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="${lt(sk,.22)}"/><stop offset=".55" stop-color="${sk}"/><stop offset="1" stop-color="${dk(sk,.16)}"/></radialGradient>
+<linearGradient id="${id}h" x1=".1" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="${lt(hc,.3)}"/><stop offset=".5" stop-color="${hc}"/><stop offset="1" stop-color="${dk(hc,.3)}"/></linearGradient>
+<linearGradient id="${id}o" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="${lt(ou,.25)}"/><stop offset="1" stop-color="${dk(ou,.22)}"/></linearGradient>
+<radialGradient id="${id}k"><stop offset="0" stop-color="#FF5C7A" stop-opacity=".55"/><stop offset="1" stop-color="#FF5C7A" stop-opacity="0"/></radialGradient>
+<radialGradient id="${id}i" cx=".4" cy=".25" r=".9"><stop offset="0" stop-color="${lt(ec,.45)}"/><stop offset=".6" stop-color="${ec}"/><stop offset="1" stop-color="${dk(ec,.35)}"/></radialGradient>`;
  let back='',front='',ax='';
- if(st==='largo')back=`<path d="M31 54C26 14 94 14 89 54L94 106L26 106Z" fill="${hc}" ${L}/>`;
- else if(st==='rizado')back=[[36,38],[48,25],[62,22],[76,26],[86,39],[31,53],[89,53]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="12" fill="${hc}" ${L}/>`).join('');
- else if(st==='coleta')back=`<path d="M84 30C114 24 118 68 100 96C102 72 94 54 86 48Z" fill="${hc}" ${L}/>`;
- else if(st==='trenzas')back=[30,90].map(x=>[58,68,78,88,98].map(y=>`<circle cx="${x}" cy="${y}" r="6" fill="${hc}" ${L}/>`).join('')).join('');
- const cap=`<path d="M33 50C30 22 48 14 62 15C78 16 91 26 87 50C86 38 80 31 68 30C52 33 40 36 33 50Z" fill="${hc}" ${L}/>`;
- if(st==='rizado')front=`<path d="M36 42C44 30 76 30 84 42C74 36 46 36 36 42Z" fill="${hc}" ${L}/>`;
- else if(st!=='calvo')front=cap+(st==='moño'?`<circle cx="60" cy="11" r="9" fill="${hc}" ${L}/>`:'')+(st==='coleta'?`<circle cx="86" cy="38" r="3.5" fill="${ou}" ${L}/>`:'');
+ if(st==='largo')back=`<path d="M31 54C26 14 94 14 89 54L94 106L26 106Z" fill="${H}" ${L}/><path d="M33 44Q29 74 33 98" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>`;
+ else if(st==='rizado')back=[[36,38],[48,25],[62,22],[76,26],[86,39],[31,53],[89,53]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="12" fill="${H}" ${L}/>`).join('');
+ else if(st==='coleta')back=`<path d="M84 30C114 24 118 68 100 96C102 72 94 54 86 48Z" fill="${H}" ${L}/>`;
+ else if(st==='trenzas')back=[30,90].map(x=>[58,68,78,88,98].map(y=>`<circle cx="${x}" cy="${y}" r="6" fill="${H}" ${L}/>`).join('')).join('');
+ const cap=`<path d="M33 50C30 22 48 14 62 15C78 16 91 26 87 50C86 38 80 31 68 30C52 33 40 36 33 50Z" fill="${H}" ${L}/><path d="M42 25Q58 16 77 27" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="3.4" stroke-linecap="round"/>`;
+ if(st==='rizado')front=`<path d="M36 42C44 30 76 30 84 42C74 36 46 36 36 42Z" fill="${H}" ${L}/><circle cx="52" cy="24" r="3" fill="#fff" fill-opacity=".3"/>`;
+ else if(st!=='calvo')front=cap+(st==='moño'?`<circle cx="60" cy="11" r="9" fill="${H}" ${L}/>`:'')+(st==='coleta'?`<circle cx="86" cy="38" r="3.5" fill="${O}" ${L}/>`:'');
  const T='M8 120C8 92 30 83 60 83C90 83 112 92 112 120Z';
- const neck=`<rect x="51" y="62" width="18" height="28" fill="${sk}"/><path d="M51 66V86M69 66V86" fill="none" ${L}/>`;
+ const neck=`<rect x="51" y="62" width="18" height="28" fill="${S}"/><path d="M51 66V86M69 66V86" fill="none" ${L}/><ellipse cx="60" cy="84" rx="12" ry="5" fill="#000" fill-opacity=".16"/>`;
+ const fold=`<path d="M18 112C22 98 36 89 50 86" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="3" stroke-linecap="round"/>`;
  let cloth='',top=false;
- if(ro==='hoodie')cloth=`<path d="${T}" fill="${ou}" ${L}/><path d="M46 84Q60 106 74 84Z" fill="${sk}" ${L}/><path d="M54 98V112M66 98V112" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`;
- else if(ro==='top'){top=true;cloth=`<path d="${T}" fill="${sk}" ${L}/><path d="M30 120C30 102 40 94 49 90Q60 100 71 90C80 94 90 102 90 120Z" fill="${ou}" ${L}/>`}
- else if(ro==='chaqueta')cloth=`<path d="${T}" fill="${ou}" ${L}/><path d="M50 84L60 120L70 84Z" fill="#F4F4F4" ${L}/><path d="M52 84L60 97L68 84Z" fill="${sk}"/>`;
- else cloth=`<path d="${T}" fill="${ou}" ${L}/><path d="M50 84Q60 97 70 84Z" fill="${sk}" ${L}/>`;
- const eye=cx=>`<g class="avey"><ellipse cx="${cx}" cy="52" rx="7.5" ry="8.5" fill="#fff" stroke="#1A1A1A" stroke-width="1.8"/><circle cx="${cx}" cy="53" r="5" fill="${ec}"/><circle cx="${cx}" cy="53" r="2.5" fill="#111"/><circle cx="${cx-1.8}" cy="50.5" r="1.7" fill="#fff"/></g>`;
+ if(ro==='hoodie')cloth=`<path d="${T}" fill="${O}" ${L}/>${fold}<path d="M46 84Q60 106 74 84Z" fill="${S}" ${L}/><path d="M54 98V112M66 98V112" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`;
+ else if(ro==='top'){top=true;cloth=`<path d="${T}" fill="${S}" ${L}/><path d="M30 120C30 102 40 94 49 90Q60 100 71 90C80 94 90 102 90 120Z" fill="${O}" ${L}/>`}
+ else if(ro==='chaqueta')cloth=`<path d="${T}" fill="${O}" ${L}/>${fold}<path d="M50 84L60 120L70 84Z" fill="#F4F4F4" ${L}/><path d="M52 84L60 97L68 84Z" fill="${S}"/>`;
+ else cloth=`<path d="${T}" fill="${O}" ${L}/>${fold}<path d="M50 84Q60 97 70 84Z" fill="${S}" ${L}/>`;
+ const eye=cx=>`<g class="avey"><ellipse cx="${cx}" cy="52" rx="7.5" ry="8.5" fill="#fff" stroke="rgba(25,12,12,.5)" stroke-width="1.2"/><circle cx="${cx}" cy="53" r="5.2" fill="url(#${id}i)"/><circle cx="${cx}" cy="53" r="2.5" fill="#111"/><circle cx="${cx-1.9}" cy="50.4" r="1.8" fill="#fff"/><circle cx="${cx+2.2}" cy="55.6" r=".9" fill="#fff" fill-opacity=".75"/><path d="M${cx-7.8} 51Q${cx} 42.2 ${cx+7.8} 51" fill="none" stroke="#1A1A1A" stroke-width="2.4" stroke-linecap="round"/></g>`;
  const d=ex==='asombro'?-3:0;
- let face=`<circle cx="44" cy="63" r="5" fill="#FF6F8A" opacity=".35"/><circle cx="76" cy="63" r="5" fill="#FF6F8A" opacity=".35"/>`+eye(47)+(ex==='guiño'?`<path d="M66 53Q73 58 80 53" fill="none" stroke="#1A1A1A" stroke-width="2.6" stroke-linecap="round"/>`:eye(73))+
- `<path d="M39 ${40+d}Q47 ${35+d} 55 ${39+d}M65 ${39+d}Q73 ${35+d} 81 ${40+d}" fill="none" stroke="${hc}" stroke-width="3.6" stroke-linecap="round"/><path d="M60 56Q57 62 61 63" fill="none" stroke="rgba(0,0,0,.38)" stroke-width="2" stroke-linecap="round"/>`;
- if(ex==='suave')face+=`<path d="M48 68Q60 77 72 68" fill="none" ${L}/>`;
+ let face=`<circle cx="43" cy="63" r="7" fill="url(#${id}k)"/><circle cx="77" cy="63" r="7" fill="url(#${id}k)"/>`+eye(47)+(ex==='guiño'?`<path d="M66 53Q73 58 80 53" fill="none" stroke="#1A1A1A" stroke-width="2.6" stroke-linecap="round"/>`:eye(73))+
+ `<path d="M39 ${40+d}Q47 ${35+d} 55 ${39+d}M65 ${39+d}Q73 ${35+d} 81 ${40+d}" fill="none" stroke="${dk(hc,.15)}" stroke-width="3.6" stroke-linecap="round"/><path d="M60 56Q57 62 61 63" fill="none" stroke="rgba(0,0,0,.32)" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="59" cy="58" rx="1.8" ry="1.2" fill="#fff" fill-opacity=".35"/>`;
+ if(ex==='suave')face+=`<path d="M48 68Q60 77 72 68" fill="none" stroke="#8A2B3A" stroke-width="2.4" stroke-linecap="round"/>`;
  else if(ex==='asombro')face+=`<ellipse cx="60" cy="72" rx="5" ry="6.5" fill="#7A1F2B" ${L}/>`;
  else face+=`<path d="M45 68Q60 86 75 68Z" fill="#7A1F2B" ${L}/><path d="M47 69.5Q60 78 73 69.5Z" fill="#fff"/>`;
- if(ac==='lentes')ax=`<circle cx="47" cy="52" r="10" fill="rgba(255,255,255,.2)" stroke="#1A1A1A" stroke-width="2.5"/><circle cx="73" cy="52" r="10" fill="rgba(255,255,255,.2)" stroke="#1A1A1A" stroke-width="2.5"/><path d="M57 51H63M37 51L33 50M83 51L87 50" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round"/>`;
- else if(ac==='gorra')ax=`<path d="M33 42C33 12 87 12 87 42Z" fill="#2A2A2A" ${L}/><path d="M28 42H92Q92 47 86 47H34Q28 47 28 42Z" fill="#1A1A1A" ${L}/>`;
+ if(ac==='lentes')ax=`<circle cx="47" cy="52" r="10" fill="#fff" fill-opacity=".18" stroke="#1A1A1A" stroke-width="2.3"/><circle cx="73" cy="52" r="10" fill="#fff" fill-opacity=".18" stroke="#1A1A1A" stroke-width="2.3"/><path d="M57 51H63M37 51L33 50M83 51L87 50" stroke="#1A1A1A" stroke-width="2.3" stroke-linecap="round"/><path d="M40 48Q44 44 49 45" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>`;
+ else if(ac==='gorra')ax=`<path d="M33 42C33 12 87 12 87 42Z" fill="#33363B" ${L}/><path d="M28 42H92Q92 47 86 47H34Q28 47 28 42Z" fill="#1E2023" ${L}/><path d="M42 24Q58 16 77 26" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="3" stroke-linecap="round"/>`;
  else if(ac==='audifonos')ax=`<path d="M31 56C28 14 92 14 89 56" fill="none" stroke="#1A1A1A" stroke-width="5" stroke-linecap="round"/><rect x="24" y="50" width="10" height="20" rx="4" fill="#39FF14" ${L}/><rect x="86" y="50" width="10" height="20" rx="4" fill="#39FF14" ${L}/>`;
  else if(ac==='cinta')ax=`<path d="M33 39Q60 29 87 39L87 46Q60 36 33 46Z" fill="#39FF14" ${L}/>`;
  else if(ac==='pecas')ax=[[42,60],[46,63],[40,64],[78,60],[74,63],[80,64]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.2" fill="rgba(120,60,20,.6)"/>`).join('');
- return `<svg width="${sz}" height="${sz}" viewBox="0 0 120 120" role="img" aria-label="Avatar" style="display:block;border-radius:50%"><defs><clipPath id="avc"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#avc)"><rect width="120" height="120" fill="${bg}"/><g class="avbob">${back}${top?cloth+neck:neck+cloth}<circle cx="33" cy="56" r="5.5" fill="${sk}" ${L}/><circle cx="87" cy="56" r="5.5" fill="${sk}" ${L}/><ellipse cx="60" cy="52" rx="27" ry="30" fill="${sk}" ${L}/>${face}${front}${ax}</g></g></svg>`}
+ return `<svg width="${sz}" height="${sz}" viewBox="0 0 120 120" role="img" aria-label="Avatar" style="display:block;border-radius:50%"><defs>${defs}</defs><g clip-path="url(#${id}c)"><rect width="120" height="120" fill="url(#${id}b)"/><g class="avbob">${back}${top?cloth+neck:neck+cloth}<circle cx="33" cy="56" r="5.5" fill="${S}" ${L}/><circle cx="87" cy="56" r="5.5" fill="${S}" ${L}/><ellipse cx="60" cy="52" rx="27" ry="30" fill="${S}" ${L}/>${face}${front}${ax}</g></g></svg>`}
 function vAv(){const o=S.avatars[S.role];
  return `<h1>Mi avatar</h1><p class="sub">Personalízalo a tu estilo</p><div style="display:flex;justify-content:center;margin:6px 0 4px"><div class="${S.pop?'pop':''}" style="border:3px solid #39FF14;border-radius:50%;box-shadow:0 0 24px rgba(57,255,20,.35)">${av(o,150)}</div></div>`+
  AVO.map(g=>`<div class="lbl">${g.l}</div><div class="swr" role="group" aria-label="${g.l}">`+g.o.map(x=>g.t==='sw'?`<button class="sw ${o[g.k]===x.v?'on':''}" style="background:${x.v}" aria-label="${x.n}" aria-pressed="${o[g.k]===x.v}" data-act="avset" data-k="${g.k}" data-v="${x.v}"></button>`:`<button class="chip ${o[g.k]===x.v?'on':''}" aria-pressed="${o[g.k]===x.v}" data-act="avset" data-k="${g.k}" data-v="${x.v}">${x.n}</button>`).join('')+`</div>`).join('')+
