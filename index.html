@@ -131,7 +131,7 @@ function vRut(){const b=S.builder;
 
 function vLogin(){return `<h1 style="margin-top:28px">Bienvenida a FITNESS</h1><p class="sub">Ingresa con tu usuario y contraseña</p>
  <form id="lf" autocomplete="off"><label class="lab" for="uIn">Usuario</label><input id="uIn" autocapitalize="none" autocorrect="off" spellcheck="false">
- <label class="lab" for="pIn">Contraseña</label><input id="pIn" type="password">
+ <label class="lab" for="pIn">Contraseña</label><div style="position:relative"><input id="pIn" type="password" style="padding-right:56px"><button type="button" id="eye" data-act="eye" aria-label="Mostrar contraseña" aria-pressed="false" style="position:absolute;right:0;top:0;width:52px;height:48px;border:0;background:transparent;color:#06484B;display:flex;align-items:center;justify-content:center"><svg id="eyeI" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
  ${S.err?`<div class="err" role="alert">${esc(S.err)}</div>`:''}
  <div style="height:16px"></div><button class="btn" type="submit" data-act="login">Ingresar</button></form>
  <div class="card" style="margin-top:18px"><div class="lbl" style="margin-top:0">CUENTAS DE DEMOSTRACIÓN</div><div class="m">Cliente: <b>camila</b> / <b>fitness2026</b></div><div class="m" style="margin-top:4px">Entrenador: <b>entrenador</b> / <b>fitness2026</b></div></div>
@@ -150,7 +150,8 @@ function tick(){$('restTxt').textContent='Descanso '+rest+' s'}
 function stopRest(){clearInterval(timer);$('rest').style.display='none'}
 
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,d=b.dataset;
- if(a==='login'){e.preventDefault();const u=($('uIn').value||'').trim().toLowerCase(),p=$('pIn').value;const A={camila:'c',entrenador:'t'};if(A[u]&&p==='fitness2026'){S.auth=A[u];S.role=A[u];S.tab=null;S.sel=null;S.err=''}else{S.err='Usuario o contraseña incorrectos.'}}
+ if(a==='eye'){const p=$('pIn'),v=p.type==='password';p.type=v?'text':'password';b.setAttribute('aria-pressed',v);b.setAttribute('aria-label',v?'Ocultar contraseña':'Mostrar contraseña');$('eyeI').innerHTML=v?'<path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A16.5 16.5 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>':'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';return}
+ else if(a==='login'){e.preventDefault();const u=($('uIn').value||'').trim().toLowerCase(),p=$('pIn').value;const A={camila:'c',entrenador:'t'};if(A[u]&&p==='fitness2026'){S.auth=A[u];S.role=A[u];S.tab=null;S.sel=null;S.err=''}else{S.err='Usuario o contraseña incorrectos.'}}
  else if(a==='logout'){S.auth=null;S.tab=null;S.sel=null;S.err='';stopRest()}
  else if(a==='tab'){S.tab=d.v;S.sel=null}
  else if(a==='skipRest'){stopRest();return}
