@@ -54,6 +54,12 @@ input:focus,select:focus,button:focus-visible{outline:2px solid #39FF14;outline-
 .bub.you{align-self:flex-start;background:rgba(8,10,12,.8);color:#F2F4F7;border:1px solid rgba(255,255,255,.14);border-bottom-left-radius:4px}
 #rest{position:absolute;left:20px;right:20px;bottom:86px;background:#39FF14;color:#04110A;border-radius:16px;padding:10px 14px;display:none;align-items:center;justify-content:space-between;font-weight:800;box-shadow:0 0 20px rgba(57,255,20,.5)}
 #rest button{background:#04110A;color:#39FF14;border:0;border-radius:10px;min-height:40px;padding:0 14px;font-weight:700}
+.swr{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:44px;height:44px;border-radius:22px;border:2px solid rgba(255,255,255,.3);padding:0}
+.sw.on{border-color:#fff;box-shadow:0 0 0 3px #39FF14}
+.chip{height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(8,10,12,.74);color:#F2F4F7;font-weight:600;font-size:14px}
+.chip.on{background:#39FF14;color:#04110A;border-color:#39FF14;font-weight:800}
+.avb{width:44px;height:44px;border-radius:22px;border:2px solid #39FF14;padding:0;background:transparent;overflow:hidden;display:block}
 .note{font-size:12px;color:#D5DAE0;text-align:center;margin-top:12px}
 </style>
 </head>
@@ -74,7 +80,7 @@ const def=()=>({role:'c',tab:'hoy',
  weights:[65.5,65,64.6,64.2,63.9,63.4],bookings:[],
  chat:[{f:'t',x:'¡Hola Camila! Hoy toca pierna y glúteo. Cualquier duda me escribes.'}],
  clients:[{n:'Camila M.',goal:'Tonificar',days:0,pay:20},{n:'Jorge R.',goal:'Fuerza',days:5,pay:12},{n:'Lucía P.',goal:'Pérdida de grasa',days:1,pay:9},{n:'Diego V.',goal:'Hipertrofia',days:0,pay:2}],
- auth:null,err:'',sel:null,day:0,builder:{name:'',items:[]},filter:'all'});
+ auth:null,err:'',prev:null,avatars:{c:{skin:'#F1C27D',hairStyle:'largo',hair:'#4A2C17',acc:'none',outfit:'#39FF14',bg:'#2A2F36'},t:{skin:'#C68642',hairStyle:'corto',hair:'#1A1A1A',acc:'gorra',outfit:'#2D9CFF',bg:'#1F3A5C'}},sel:null,day:0,builder:{name:'',items:[]},filter:'all'});
 let S=def();
 try{const r=localStorage.getItem('pt-proto');if(r)S=Object.assign(def(),JSON.parse(r))}catch(e){}
 const save=()=>{try{localStorage.setItem('pt-proto',JSON.stringify(S))}catch(e){}};
@@ -87,8 +93,32 @@ const dayList=()=>{const o=[],n=new Date(),N=['Dom','Lun','Mar','Mié','Jue','Vi
 const SLOTS=['07:00','08:00','09:00','10:00','17:00','18:00','19:00','20:00','21:00'];
 const TAKEN=s=>(s.charCodeAt(0)+s.charCodeAt(1))%4===0;
 
+const AVO=[
+{k:'skin',l:'TONO DE PIEL',t:'sw',o:[{v:'#FFDBB4',n:'Piel muy clara'},{v:'#F1C27D',n:'Piel clara'},{v:'#C68642',n:'Piel trigueña'},{v:'#8D5524',n:'Piel morena'},{v:'#5C3A1E',n:'Piel oscura'}]},
+{k:'hairStyle',l:'ESTILO DE PELO',t:'chip',o:[{v:'corto',n:'Corto'},{v:'largo',n:'Largo'},{v:'rizado',n:'Rizado'},{v:'moño',n:'Moño'},{v:'calvo',n:'Sin pelo'}]},
+{k:'hair',l:'COLOR DE PELO',t:'sw',o:[{v:'#1A1A1A',n:'Negro'},{v:'#4A2C17',n:'Castaño'},{v:'#B5651D',n:'Cobrizo'},{v:'#E6C35C',n:'Rubio'},{v:'#C0392B',n:'Rojo'},{v:'#8E8E93',n:'Gris'}]},
+{k:'acc',l:'ACCESORIO',t:'chip',o:[{v:'none',n:'Ninguno'},{v:'gafas',n:'Lentes'},{v:'cinta',n:'Cinta'},{v:'gorra',n:'Gorra'}]},
+{k:'outfit',l:'COLOR DE POLO',t:'sw',o:[{v:'#39FF14',n:'Verde neón'},{v:'#2D9CFF',n:'Azul'},{v:'#FF4D8D',n:'Rosado'},{v:'#FFB454',n:'Naranja'},{v:'#FFFFFF',n:'Blanco'},{v:'#9B5DE5',n:'Morado'}]},
+{k:'bg',l:'FONDO',t:'sw',o:[{v:'#2A2F36',n:'Gris'},{v:'#0B3D2E',n:'Verde oscuro'},{v:'#3D1F5C',n:'Morado oscuro'},{v:'#5C1F2E',n:'Vino'},{v:'#1F3A5C',n:'Azul oscuro'}]}];
+let lastTab=null;
+const cl=v=>/^#[0-9A-Fa-f]{6}$/.test(v)?v:'#888888';
+function av(o,sz){o=o||{};const sk=cl(o.skin),hc=cl(o.hair),ou=cl(o.outfit),bg=cl(o.bg),st=o.hairStyle,ac=o.acc;
+ let back='',front='',ax='';
+ if(st==='largo')back=`<path d="M24 52C20 18 80 18 76 52L79 84L21 84Z" fill="${hc}"/>`;
+ const cap=`<path d="M29 44C27 22 40 17 50 17C62 17 73 23 71 44C66 34 58 30 50 30C42 30 34 34 29 44Z" fill="${hc}"/>`;
+ if(st==='corto'||st==='largo')front=cap;
+ else if(st==='moño')front=cap+`<circle cx="50" cy="13" r="8" fill="${hc}"/>`;
+ else if(st==='rizado')front=cap+[[31,34],[41,25],[54,24],[66,32],[70,44],[30,44]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="8" fill="${hc}"/>`).join('');
+ if(ac==='gafas')ax=`<circle cx="42" cy="47" r="6.5" fill="rgba(255,255,255,.18)" stroke="#111" stroke-width="2"/><circle cx="58" cy="47" r="6.5" fill="rgba(255,255,255,.18)" stroke="#111" stroke-width="2"/><path d="M48.5 47H51.5" stroke="#111" stroke-width="2"/>`;
+ else if(ac==='cinta')ax=`<rect x="28" y="32" width="44" height="6" rx="3" fill="#39FF14"/>`;
+ else if(ac==='gorra')ax=`<path d="M30 38C30 17 70 17 70 38Z" fill="#222"/><rect x="26" y="36" width="56" height="5" rx="2.5" fill="#111"/>`;
+ return `<svg width="${sz}" height="${sz}" viewBox="0 0 100 100" role="img" aria-label="Avatar" style="display:block;border-radius:50%"><defs><clipPath id="avc"><circle cx="50" cy="50" r="50"/></clipPath></defs><g clip-path="url(#avc)"><rect width="100" height="100" fill="${bg}"/>${back}<path d="M12 100C12 76 30 69 50 69C70 69 88 76 88 100Z" fill="${ou}"/><rect x="43" y="58" width="14" height="16" fill="${sk}"/><ellipse cx="50" cy="46" rx="20" ry="23" fill="${sk}"/>${front}<circle cx="42" cy="47" r="2.3" fill="#1A1A1A"/><circle cx="58" cy="47" r="2.3" fill="#1A1A1A"/><path d="M43 56Q50 62 57 56" stroke="#1A1A1A" stroke-width="2" fill="none" stroke-linecap="round"/>${ax}</g></svg>`}
+function vAv(){const o=S.avatars[S.role];
+ return `<h1>Mi avatar</h1><p class="sub">Personalízalo a tu estilo</p><div style="display:flex;justify-content:center;margin:6px 0 4px"><div style="border:3px solid #39FF14;border-radius:50%;box-shadow:0 0 24px rgba(57,255,20,.35)">${av(o,132)}</div></div>`+
+ AVO.map(g=>`<div class="lbl">${g.l}</div><div class="swr" role="group" aria-label="${g.l}">`+g.o.map(x=>g.t==='sw'?`<button class="sw ${o[g.k]===x.v?'on':''}" style="background:${x.v}" aria-label="${x.n}" aria-pressed="${o[g.k]===x.v}" data-act="avset" data-k="${g.k}" data-v="${x.v}"></button>`:`<button class="chip ${o[g.k]===x.v?'on':''}" aria-pressed="${o[g.k]===x.v}" data-act="avset" data-k="${g.k}" data-v="${x.v}">${x.n}</button>`).join('')+`</div>`).join('')+
+ `<div class="row" style="margin-top:18px"><button class="btn o" data-act="avrand">Aleatorio</button><button class="btn" data-act="closeAv">Listo</button></div>`}
 function vHoy(){const r=S.routine,tot=r.items.reduce((a,i)=>a+i.sets,0),dn=r.items.reduce((a,i)=>a+i.done,0),pct=tot?Math.round(dn/tot*100):0;
- return `<h1>Hola, Camila</h1><p class="sub">Tu entrenamiento de hoy</p>
+ return `<div class="row" style="margin-bottom:14px">${av(S.avatars.c,56)}<div><h1 style="margin:0">Hola, Camila</h1><p class="sub" style="margin:0">Tu entrenamiento de hoy</p></div></div>
  <div class="lime"><div class="m" style="color:#04110A;opacity:.8;font-weight:600">Rutina asignada</div><div style="font-size:24px;font-weight:800;letter-spacing:-.02em;margin:2px 0 12px">${esc(r.name)}</div><div class="bar"><i style="width:${pct}%"></i></div><div style="font-size:13px;font-weight:700;margin-top:6px">${dn} de ${tot} series · ${pct}%${pct===100?' · ¡Completado!':''}</div></div>
  <div class="lbl">EJERCICIOS</div>`+r.items.map((it,i)=>`<div class="card"><div class="row"><div class="grow"><div class="t">${esc(it.ex)}</div><div class="m">${it.sets} × ${it.reps}${it.kg?' · '+it.kg+' kg':' · peso corporal'}</div></div>${it.kg?`<button class="sm" aria-label="Bajar peso" data-act="kg" data-i="${i}" data-d="-2.5">−</button><button class="sm" aria-label="Subir peso" data-act="kg" data-i="${i}" data-d="2.5">+</button>`:''}</div><div class="sets">${Array.from({length:it.sets},(_,k)=>`<button class="set ${k<it.done?'on':''}" aria-label="Serie ${k+1}" aria-pressed="${k<it.done}" data-act="set" data-i="${i}" data-k="${k}">${k+1}</button>`).join('')}</div></div>`).join('')+`<p class="note">Marca cada serie al terminarla: se inicia el descanso.</p>`}
 
@@ -111,14 +141,14 @@ function vProg(){const w=S.weights,mn=Math.min(...w)-.5,mx=Math.max(...w)+.5,pts
 function vChat(){const me=S.role==='c'?'c':'t';
  return `<h1>Chat</h1><p class="sub">${S.role==='c'?'Con tu entrenador':'Con Camila M.'}</p><div style="display:flex;flex-direction:column;min-height:300px" id="msgs">`+S.chat.map(m=>`<div class="bub ${m.f===me?'me':'you'}">${esc(m.x)}</div>`).join('')+`</div><div class="row" style="margin-top:8px"><input id="cIn" placeholder="Escribe un mensaje" aria-label="Mensaje"><button class="btn" style="width:96px" data-act="send">Enviar</button></div><p class="note">Cambia de modo arriba para ver los dos lados de la conversación.</p>`}
 
-function vClientes(){if(S.sel!=null){const c=S.clients[S.sel];return `<button class="btn o" style="width:auto;height:44px" data-act="back">← Clientes</button><h1>${esc(c.n)}</h1><p class="sub">Objetivo: ${esc(c.goal)}</p>
+function vClientes(){if(S.sel!=null){const c=S.clients[S.sel];return `<button class="btn o" style="width:auto;height:44px" data-act="back">← Clientes</button><div class="row" style="margin:6px 0 14px">${S.sel===0?av(S.avatars.c,56):''}<div><h1 style="margin:0">${esc(c.n)}</h1><p class="sub" style="margin:0">Objetivo: ${esc(c.goal)}</p></div></div>
  <div class="card"><div class="m">Último entrenamiento</div><div class="t">${c.days===0?'Hoy':'Hace '+c.days+' días'}</div></div>
  <div class="card"><div class="m">Membresía</div><div class="t">Vence en ${c.pay} días</div></div>
  ${S.sel===0?`<div class="card"><div class="m">Rutina actual</div><div class="t">${esc(S.routine.name)}</div></div><div class="lbl">ASIGNAR RUTINA</div><select id="asg" aria-label="Rutina">${S.templates.map((t,i)=>`<option value="${i}">${esc(t.name)}</option>`).join('')}</select><div style="height:10px"></div><button class="btn" data-act="assign">Asignar a Camila</button>`:'<p class="note">En este prototipo solo Camila recibe rutinas.</p>'}
  <div style="height:10px"></div><button class="btn o" data-act="toChat">Escribir a Camila</button>`}
  const f=S.filter,list=S.clients.map((c,i)=>({c,i})).filter(x=>f==='all'||(f==='idle'&&x.c.days>=3)||(f==='pay'&&x.c.pay<=3));
  return `<h1>Mis clientes</h1><p class="sub">${S.clients.length} activos</p><div class="row" style="margin-bottom:12px"><button class="btn ${f==='all'?'':'o'}" style="height:44px" data-act="flt" data-v="all">Todos</button><button class="btn ${f==='idle'?'':'o'}" style="height:44px" data-act="flt" data-v="idle">Sin entrenar</button><button class="btn ${f==='pay'?'':'o'}" style="height:44px" data-act="flt" data-v="pay">Pagos</button></div>`+
- list.map(({c,i})=>`<button class="card row" style="width:100%;text-align:left" data-act="open" data-i="${i}"><div style="width:44px;height:44px;border-radius:22px;background:#39FF14;color:#04110A;display:flex;align-items:center;justify-content:center;font-weight:700">${c.n.split(' ').map(s=>s[0]).join('')}</div><div class="grow"><div class="t">${esc(c.n)}</div><div class="m">${esc(c.goal)}</div></div>${c.days>=3?`<span class="pill w">${c.days} días sin entrenar</span>`:c.pay<=3?`<span class="pill w">Pago en ${c.pay} d</span>`:'<span class="pill">Al día</span>'}</button>`).join('')}
+ list.map(({c,i})=>`<button class="card row" style="width:100%;text-align:left" data-act="open" data-i="${i}">${i===0?av(S.avatars.c,44):`<div style="width:44px;height:44px;border-radius:22px;background:#39FF14;color:#04110A;display:flex;align-items:center;justify-content:center;font-weight:700">${c.n.split(' ').map(s=>s[0]).join('')}</div>`}<div class="grow"><div class="t">${esc(c.n)}</div><div class="m">${esc(c.goal)}</div></div>${c.days>=3?`<span class="pill w">${c.days} días sin entrenar</span>`:c.pay<=3?`<span class="pill w">Pago en ${c.pay} d</span>`:'<span class="pill">Al día</span>'}</button>`).join('')}
 
 function vRut(){const b=S.builder;
  return `<h1>Rutinas</h1><p class="sub">Tus plantillas</p>`+S.templates.map(t=>`<div class="card"><div class="t">${esc(t.name)}</div><div class="m">${t.items.length} ejercicios · ${t.items.map(i=>esc(i.ex)).join(', ')}</div></div>`).join('')+
@@ -136,10 +166,10 @@ function vLogin(){return `<h1 style="margin-top:28px">Bienvenida a FITNESS</h1><
  <p class="note">Prototipo: las cuentas son de ejemplo y no son seguras.</p>`}
 function render(){
  if(!S.auth){$('topR').innerHTML='';$('nav').style.display='none';$('main').innerHTML=vLogin();save();return}
- $('nav').style.display='flex';S.role=S.auth;$('topR').innerHTML='<button class="out" data-act="logout">Salir</button>';const t=S.role;
- const tabs=TABS[t];if(!tabs.some(x=>x[0]===S.tab))S.tab=tabs[0][0];
+ $('nav').style.display='flex';S.role=S.auth;$('topR').innerHTML='<div class="row" style="gap:10px"><button class="avb" data-act="openAv" aria-label="Personalizar mi avatar">'+av(S.avatars[S.role],40)+'</button><button class="out" data-act="logout">Salir</button></div>';const t=S.role;
+ const tabs=TABS[t];if(S.tab!=='av'&&!tabs.some(x=>x[0]===S.tab))S.tab=tabs[0][0];
  $('nav').innerHTML=tabs.map(x=>`<button class="${S.tab===x[0]?'on':''}" data-act="tab" data-v="${x[0]}">${svg(ic[x[2]])}${x[1]}</button>`).join('');
- const V={hoy:vHoy,ag:vAgenda,pr:vProg,ch:vChat,cl:vClientes,ru:vRut};$('main').innerHTML=V[S.tab]();
+ const V={av:vAv,hoy:vHoy,ag:vAgenda,pr:vProg,ch:vChat,cl:vClientes,ru:vRut};const sc=$('main').scrollTop,same=lastTab===S.tab;$('main').innerHTML=V[S.tab]();if(same&&S.tab==='av')$('main').scrollTop=sc;lastTab=S.tab;
  const m=$('msgs');if(m)$('main').scrollTop=$('main').scrollHeight;save()}
 
 let rest=0,timer=null;
@@ -148,7 +178,11 @@ function tick(){$('restTxt').textContent='Descanso '+rest+' s'}
 function stopRest(){clearInterval(timer);$('rest').style.display='none'}
 
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,d=b.dataset;
- if(a==='eye'){const p=$('pIn'),v=p.type==='password';p.type=v?'text':'password';b.setAttribute('aria-pressed',v);b.setAttribute('aria-label',v?'Ocultar contraseña':'Mostrar contraseña');$('eyeI').innerHTML=v?'<path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A16.5 16.5 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>':'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';return}
+ if(a==='avset'){S.avatars[S.role][d.k]=d.v}
+ else if(a==='avrand'){const o=S.avatars[S.role];AVO.forEach(g=>{o[g.k]=g.o[Math.floor(Math.random()*g.o.length)].v})}
+ else if(a==='openAv'){S.prev=S.tab;S.tab='av'}
+ else if(a==='closeAv'){S.tab=(S.prev&&S.prev!=='av')?S.prev:null}
+ else if(a==='eye'){const p=$('pIn'),v=p.type==='password';p.type=v?'text':'password';b.setAttribute('aria-pressed',v);b.setAttribute('aria-label',v?'Ocultar contraseña':'Mostrar contraseña');$('eyeI').innerHTML=v?'<path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A16.5 16.5 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>':'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';return}
  else if(a==='login'){e.preventDefault();const u=($('uIn').value||'').trim().toLowerCase(),p=$('pIn').value;const A={camila:'c',entrenador:'t'};if(A[u]&&p==='fitness2026'){S.auth=A[u];S.role=A[u];S.tab=null;S.sel=null;S.err=''}else{S.err='Usuario o contraseña incorrectos.'}}
  else if(a==='logout'){S.auth=null;S.tab=null;S.sel=null;S.err='';stopRest()}
  else if(a==='tab'){S.tab=d.v;S.sel=null}
